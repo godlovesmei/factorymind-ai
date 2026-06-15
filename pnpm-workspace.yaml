@@ -1,0 +1,18 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
+childConcurrency: 4
+fetchRetries: 5
+fetchRetryFactor: 2
+fetchRetryMaxtimeout: 120000
+fetchRetryMintimeout: 20000
+fetchTimeout: 600000
+networkConcurrency: 8
+preferOffline: true

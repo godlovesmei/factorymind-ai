@@ -1,0 +1,24 @@
+name: factorymind-ai
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: factorymind-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-factorymind}
+      MYSQL_USER: ${MYSQL_USER:-factorymind}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-factorymind}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-factorymind-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - factorymind_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  factorymind_mysql_data:
