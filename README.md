@@ -4,9 +4,9 @@ FactoryMind AI is a portfolio-ready smart manufacturing operations dashboard. It
 
 This repository follows `PLAN.md` for architecture and milestone scope, and `DESIGN.md` for the Apple-inspired visual system.
 
-## Current Milestone
+## Current Implementation
 
-Milestone 1 sets up the project foundation only:
+Milestone 1 sets up the project foundation:
 
 - pnpm monorepo workspace
 - Next.js frontend app skeleton
@@ -16,7 +16,18 @@ Milestone 1 sets up the project foundation only:
 - MySQL Docker Compose service
 - Initial documentation and environment template
 
-MQTT, AI/ML, Laravel, auth, realtime dashboard features, and full database models are intentionally left for later milestones.
+Milestone 2 adds the static dashboard UI:
+
+- `/dashboard` route
+- Sidebar navigation and dashboard shell
+- Machine summary cards
+- Machine status cards with dummy sensor data
+- Static sensor trend chart
+- Latest alerts table
+- Production summary
+- Mock AI insight card
+
+MQTT, API-backed data, Socket.IO realtime updates, AI/ML services, Laravel, auth, and full database models are intentionally left for later milestones.
 
 ## Tech Stack
 
@@ -73,6 +84,13 @@ Start MySQL:
 pnpm db:up
 ```
 
+Run migrations and seed data:
+
+```bash
+pnpm db:migrate
+pnpm db:seed
+```
+
 Run the frontend and backend together:
 
 ```bash
@@ -89,9 +107,21 @@ pnpm dev:api
 Default local URLs:
 
 - Frontend: `http://localhost:3000`
+- Dashboard: `http://localhost:3000/dashboard`
 - Backend health: `http://localhost:4000/health`
 - API health: `http://localhost:4000/api/health`
 - MySQL: `localhost:3306`
+
+### Prisma Shadow Database
+
+Prisma Migrate uses a shadow database during `pnpm db:migrate`. The local Docker setup creates `factorymind_shadow` through `docker/mysql/init/01-shadow-database.sql` for fresh volumes.
+
+If you created the MySQL volume before that init script existed and see `P3014`, run:
+
+```bash
+docker compose exec -T mysql mysql -uroot -pfactorymind-root -e "CREATE DATABASE IF NOT EXISTS factorymind_shadow"
+docker compose exec -T mysql mysql -uroot -pfactorymind-root -e "GRANT ALL PRIVILEGES ON factorymind_shadow.* TO 'factorymind'@'%'"
+```
 
 ## Environment Variables
 
@@ -112,4 +142,4 @@ AI_PROVIDER=mock
 
 ## Next Milestone
 
-Milestone 2 should build the static dashboard UI with dummy machine data, responsive layout, machine status cards, charts, alert table, and sidebar navigation.
+Milestone 3 should create the database schema, REST API endpoints, and connect the dashboard to backend data.

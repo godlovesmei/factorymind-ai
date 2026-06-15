@@ -2,6 +2,11 @@ import cors from "cors";
 import express from "express";
 import { env } from "./config/env.js";
 import { healthRouter } from "./routes/health.route.js";
+import { machineRouter } from "./routes/machine.route.js";
+import { sensorLogRouter } from "./routes/sensor-log.route.js";
+import { alertRouter } from "./routes/alert.route.js";
+import { dashboardRouter } from "./routes/dashboard.route.js";
+import { errorHandler } from "./middleware/error-handler.js";
 
 export function createApp() {
   const app = express();
@@ -18,12 +23,19 @@ export function createApp() {
     response.json({
       name: "FactoryMind AI API",
       status: "ok",
-      milestone: "project-setup"
+      milestone: "backend-database"
     });
   });
 
   app.use("/health", healthRouter);
   app.use("/api/health", healthRouter);
+
+  app.use("/api/machines", machineRouter);
+  app.use("/api/sensor-logs", sensorLogRouter);
+  app.use("/api/alerts", alertRouter);
+  app.use("/api/dashboard", dashboardRouter);
+
+  app.use(errorHandler);
 
   return app;
 }

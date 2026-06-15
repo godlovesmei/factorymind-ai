@@ -20,6 +20,7 @@
     "db:down": "docker compose down",
     "db:generate": "dotenv -e .env -- pnpm --filter @factorymind/database db:generate",
     "db:migrate": "dotenv -e .env -- pnpm --filter @factorymind/database db:migrate",
+    "db:seed": "dotenv -e .env -- pnpm --filter @factorymind/database db:seed",
     "db:studio": "dotenv -e .env -- pnpm --filter @factorymind/database db:studio"
   },
   "devDependencies": {

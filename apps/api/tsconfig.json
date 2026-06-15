@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "lib": ["ES2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -10,7 +11,8 @@
     "types": ["node"],
     "paths": {
       "@factorymind/shared": ["../../packages/shared/src/index.ts"],
-      "@factorymind/shared/*": ["../../packages/shared/src/*"]
+      "@factorymind/shared/*": ["../../packages/shared/src/*"],
+      "@factorymind/database": ["../../packages/database/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],

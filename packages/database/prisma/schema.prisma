@@ -3,6 +3,184 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// Enums
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  MAINTENANCE_ENGINEER
+  MANAGER
+}
+
+enum MachineStatus {
+  NORMAL
+  WARNING
+  CRITICAL
+  DOWNTIME
+  MAINTENANCE
+}
+
+enum AlertSeverity {
+  WARNING
+  CRITICAL
+}
+
+enum MaintenanceTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+// Users
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(OPERATOR)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  aiChatMessages AiChatMessage[]
+
+  @@map("users")
+}
+
+// Machines
+
+model Machine {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  location    String
+  type        String
+  status      MachineStatus @default(NORMAL)
+  healthScore Int           @default(100) @map("health_score")
+  lastSeenAt  DateTime?     @map("last_seen_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  sensorLogs          SensorLog[]
+  alerts              Alert[]
+  maintenanceTickets  MaintenanceTicket[]
+
+  @@index([status])
+  @@map("machines")
+}
+
+// Sensor logs
+
+model SensorLog {
+  id              String        @id @default(cuid())
+  machineId       String        @map("machine_id")
+  temperature     Float
+  vibration       Float
+  pressure        Float
+  productionCount Int           @map("production_count")
+  status          MachineStatus
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  machine Machine @relation(fields: [machineId], references: [id])
+  alerts  Alert[]
+
+  @@index([machineId, createdAt])
+  @@index([createdAt])
+  @@map("sensor_logs")
+}
+
+// Alerts
+
+model Alert {
+  id          String        @id @default(cuid())
+  machineId   String        @map("machine_id")
+  sensorLogId String?       @map("sensor_log_id")
+  severity    AlertSeverity
+  title       String
+  message     String
+  isResolved  Boolean       @default(false) @map("is_resolved")
+  resolvedAt  DateTime?     @map("resolved_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  machine            Machine              @relation(fields: [machineId], references: [id])
+  sensorLog          SensorLog?           @relation(fields: [sensorLogId], references: [id])
+  maintenanceTickets MaintenanceTicket[]
+
+  @@index([machineId])
+  @@index([severity])
+  @@index([isResolved])
+  @@map("alerts")
+}
+
+// Maintenance tickets
+
+model MaintenanceTicket {
+  id          String                  @id @default(cuid())
+  machineId   String                  @map("machine_id")
+  alertId     String?                 @map("alert_id")
+  title       String
+  description String                  @db.Text
+  priority    MaintenancePriority
+  status      MaintenanceTicketStatus @default(OPEN)
+  assignedTo  String?                 @map("assigned_to")
+  source      String                  @default("manual")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+
+  machine Machine             @relation(fields: [machineId], references: [id])
+  alert   Alert? @relation(fields: [alertId], references: [id])
+
+  @@index([machineId])
+  @@index([status])
+  @@map("maintenance_tickets")
+}
+
+// AI reports
+
+model AiReport {
+  id          String   @id @default(cuid())
+  reportType  String   @map("report_type")
+  title       String
+  summary     String   @db.Text
+  content     String   @db.Text
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  generatedBy String?  @map("generated_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("ai_reports")
+}
+
+// AI chat messages
+
+model AiChatMessage {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  role      ChatRole
+  message   String   @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("ai_chat_messages")
 }
